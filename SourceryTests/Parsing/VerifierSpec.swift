@@ -1,7 +1,9 @@
 import Quick
 import Nimble
+import PathKit
 @testable import Sourcery
 @testable import SourceryRuntime
+@testable import SourceryFramework
 
 class VerifierSpec: QuickSpec {
     override func spec() {

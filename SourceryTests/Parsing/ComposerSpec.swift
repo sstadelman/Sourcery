@@ -10,6 +10,7 @@ import PathKit
 import SourceKittenFramework
 @testable import Sourcery
 @testable import SourceryRuntime
+@testable import SourceryFramework
 
 private func build(_ source: String) -> [String: SourceKitRepresentable]? {
     return try? Structure(file: File(contents: source)).dictionary

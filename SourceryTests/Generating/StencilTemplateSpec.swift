@@ -4,6 +4,7 @@ import PathKit
 import Stencil
 @testable import Sourcery
 @testable import SourceryRuntime
+@testable import SourceryFramework
 
 class StencilTemplateSpec: QuickSpec {
     // swiftlint:disable:next function_body_length

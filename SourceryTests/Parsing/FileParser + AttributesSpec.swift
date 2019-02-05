@@ -2,6 +2,7 @@ import Quick
 import Nimble
 @testable import Sourcery
 @testable import SourceryRuntime
+@testable import SourceryFramework
 
 class FileParserAttributesSpec: QuickSpec {
     override func spec() {

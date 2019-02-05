@@ -12,9 +12,9 @@ import Foundation
 import SourceryRuntime
 import SourcerySwift
 
-extension SwiftTemplate: Template {
+extension SwiftTemplate: ITemplate {
 
-    func render(_ context: TemplateContext) throws -> String {
+    public func render(_ context: TemplateContext) throws -> String {
         return try self.render(context as Any)
     }
 

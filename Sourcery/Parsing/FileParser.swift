@@ -26,7 +26,7 @@ extension Parsable {
 
 extension Type {
 
-    var path: Path? {
+    public var path: Path? {
         return __path.map({ Path($0) })
     }
 
@@ -39,7 +39,7 @@ extension Type {
         return try path?.read(.utf8)
     }
 
-    func rangeToAppendBody() throws -> NSRange? {
+    public func rangeToAppendBody() throws -> NSRange? {
         guard let contents = try self.contents() else { return nil }
         guard let bodyRange = bodyRange(contents) else { return nil }
         let bodyEndRange = NSRange(location: NSMaxRange(bodyRange), length: 0)
@@ -57,11 +57,14 @@ extension EnumCase: Parsable {}
 extension Subscript: Parsable {}
 extension Attribute: Parsable {}
 
-final class FileParser {
+private var inUnitTests2 = NSClassFromString("XCTest") != nil
+final public class FileParser {
 
-    let path: String?
+    private static let version: String = inUnitTests2 ? "Major.Minor.Patch" : Version.current.value
+
+    public let path: String?
     let module: String?
-    let initialContents: String
+    public let initialContents: String
 
     fileprivate var contents: String!
     fileprivate var annotations: AnnotationsParser!
@@ -78,7 +81,7 @@ final class FileParser {
     ///   - contents: Contents to parse.
     ///   - path: Path to file.
     /// - Throws: parsing errors.
-    init(contents: String, path: Path? = nil, module: String? = nil) throws {
+    public init(contents: String, path: Path? = nil, module: String? = nil) throws {
         self.path = path?.string
         self.module = module
         self.initialContents = contents
@@ -112,7 +115,7 @@ final class FileParser {
         let source = try Structure(file: file).dictionary
 
         let (types, typealiases) = try parseTypes(source)
-        return FileParserResult(path: path, module: module, types: types, typealiases: typealiases, inlineRanges: inlineRanges, contentSha: initialContents.sha256() ?? "", sourceryVersion: Sourcery.version)
+        return FileParserResult(path: path, module: module, types: types, typealiases: typealiases, inlineRanges: inlineRanges, contentSha: initialContents.sha256() ?? "", sourceryVersion: FileParser.version)
     }
 
     internal func parseTypes(_ source: [String: SourceKitRepresentable]) throws -> ([Type], [Typealias]) {
@@ -301,7 +304,7 @@ extension FileParser {
         return (name, kind, accessibility)
     }
 
-    internal func extractInheritedTypes(source: [String: SourceKitRepresentable]) -> [String] {
+    public func extractInheritedTypes(source: [String: SourceKitRepresentable]) -> [String] {
         return (source[SwiftDocKey.inheritedtypes.rawValue] as? [[String: SourceKitRepresentable]])?.compactMap { type in
             return type[SwiftDocKey.name.rawValue] as? String
         } ?? []

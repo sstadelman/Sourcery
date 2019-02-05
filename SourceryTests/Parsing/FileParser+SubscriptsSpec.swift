@@ -4,6 +4,7 @@ import PathKit
 import SourceKittenFramework
 @testable import Sourcery
 @testable import SourceryRuntime
+@testable import SourceryFramework
 
 class FileParserSubscriptsSpec: QuickSpec {
 

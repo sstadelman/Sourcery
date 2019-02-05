@@ -3,8 +3,11 @@ import Stencil
 import PathKit
 import StencilSwiftKit
 import SourceryRuntime
+import SourceryFramework
 
-final class StencilTemplate: StencilSwiftKit.StencilSwiftTemplate, Template {
+private typealias Annotations = [String: NSObject]
+
+final class StencilTemplate: StencilSwiftKit.StencilSwiftTemplate, ITemplate {
     private(set) var sourcePath: Path = ""
 
     convenience init(path: Path) throws {

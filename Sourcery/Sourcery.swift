@@ -7,6 +7,7 @@ import Foundation
 import PathKit
 import SwiftTryCatch
 import SourceryRuntime
+import SourceryFramework
 import SourceryJS
 import xcproj
 
@@ -80,7 +81,7 @@ class Sourcery {
             case let .sources(paths):
                 result = try self.parse(from: paths.include, exclude: paths.exclude, forceParse: forceParse, modules: nil)
             case let .projects(projects):
-                var paths = [Path]()
+                var paths = [PathKit.Path]()
                 var modules = [String]()
                 projects.forEach { project in
                     project.targets.forEach { target in
@@ -163,8 +164,8 @@ class Sourcery {
         return Array([sourceWatchers, templateWatchers].joined())
     }
 
-    private func topPaths(from paths: [Path]) -> [Path] {
-        var top = [(Path, [Path])]()
+    private func topPaths(from paths: [PathKit.Path]) -> [PathKit.Path] {
+        var top = [(PathKit.Path, [PathKit.Path])]()
         paths.forEach { path in
             // See if its already contained by the topDirectories
             guard top.first(where: { (_, children) -> Bool in
@@ -189,7 +190,7 @@ class Sourcery {
 
     /// This function should be used to retrieve the path to the cache instead of `Path.cachesDir`,
     /// as it considers the `--cacheDisabled` and `--cacheBasePath` command line parameters.
-    fileprivate func cachesDir(sourcePath: Path, createIfMissing: Bool = true) -> Path? {
+    fileprivate func cachesDir(sourcePath: PathKit.Path, createIfMissing: Bool = true) -> PathKit.Path? {
         return cacheDisabled
             ? nil
             : Path.cachesDir(sourcePath: sourcePath, basePath: cacheBasePath, createIfMissing: createIfMissing)
@@ -199,17 +200,17 @@ class Sourcery {
     /// Currently this is only called from tests, and the `--cacheDisabled` and `--cacheBasePath` command line parameters are not considered.
     ///
     /// - Parameter sources: paths of the sources you want to delete the
-    static func removeCache(for sources: [Path], cacheDisabled: Bool = false, cacheBasePath: Path? = nil) {
+    static func removeCache(for sources: [PathKit.Path], cacheDisabled: Bool = false, cacheBasePath: PathKit.Path? = nil) {
         if cacheDisabled {
             return
         }
         sources.forEach { path in
-            let cacheDir = Path.cachesDir(sourcePath: path, basePath: cacheBasePath, createIfMissing: false)
+            let cacheDir = PathKit.Path.cachesDir(sourcePath: path, basePath: cacheBasePath, createIfMissing: false)
             _ = try? cacheDir.delete()
         }
     }
 
-    fileprivate func templates(from: Paths) throws -> [Template] {
+    fileprivate func templates(from: Paths) throws -> [ITemplate] {
         return try templatePaths(from: from).compactMap {
             if $0.extension == "swifttemplate" {
                 #if SWIFT_PACKAGE
@@ -231,7 +232,7 @@ class Sourcery {
         }
     }
 
-    private func templatePaths(from: Paths) -> [Path] {
+    private func templatePaths(from: Paths) -> [PathKit.Path] {
         return from.allPaths.filter { $0.isTemplateFile }
     }
 
@@ -242,7 +243,7 @@ class Sourcery {
 extension Sourcery {
     typealias ParsingResult = (types: Types, inlineRanges: [(file: String, ranges: [String: NSRange])])
 
-    fileprivate func parse(from: [Path], exclude: [Path] = [], forceParse: [String] = [], modules: [String]?) throws -> ParsingResult {
+    fileprivate func parse(from: [PathKit.Path], exclude: [PathKit.Path] = [], forceParse: [String] = [], modules: [String]?) throws -> ParsingResult {
         if let modules = modules {
             precondition(from.count == modules.count, "There should be module for each file to parse")
         }
@@ -447,7 +448,7 @@ extension Sourcery {
         }
     }
 
-    private func generate(_ template: Template, forParsingResult parsingResult: ParsingResult, outputPath: Path) throws -> String {
+    private func generate(_ template: ITemplate, forParsingResult parsingResult: ParsingResult, outputPath: Path) throws -> String {
         guard watcherEnabled else {
             let result = try Generator.generate(parsingResult.types, template: template, arguments: self.arguments)
             return try processRanges(in: parsingResult, result: result, outputPath: outputPath)

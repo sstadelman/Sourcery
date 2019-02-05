@@ -3,6 +3,7 @@ import Nimble
 import PathKit
 @testable import Sourcery
 @testable import SourceryRuntime
+@testable import SourceryFramework
 import xcproj
 
 private let version = "Major.Minor.Patch"

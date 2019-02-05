@@ -2,16 +2,16 @@ import SourceryJS
 import SourceryRuntime
 import JavaScriptCore
 
-class JavaScriptTemplate: EJSTemplate, Template {
+public class JavaScriptTemplate: EJSTemplate, ITemplate {
 
-    override var context: [String: Any] {
+    override public var context: [String: Any] {
         didSet {
             jsContext.catchTypesAccessErrors()
             jsContext.catchTemplateContextTypesUnknownProperties()
         }
     }
 
-    func render(_ context: TemplateContext) throws -> String {
+    public func render(_ context: TemplateContext) throws -> String {
         return try render(context.jsContext)
     }
 

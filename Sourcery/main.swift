@@ -11,6 +11,7 @@ import Commander
 import PathKit
 import SourceryRuntime
 import SourceryJS
+import SourceryFramework
 
 extension Path: ArgumentConvertible {
     /// :nodoc:
@@ -53,7 +54,7 @@ private enum Validators {
     }
 }
 
-extension Configuration {
+extension SourceryFramework.Configuration {
 
     func validate() {
         guard !source.isEmpty else {

@@ -4,15 +4,15 @@ import PathKit
 import Yams
 import SourceryRuntime
 
-struct Project {
-    let file: XcodeProj
-    let root: Path
-    let targets: [Target]
-    let exclude: [Path]
+public struct Project {
+    public let file: XcodeProj
+    public let root: PathKit.Path
+    public let targets: [Target]
+    public let exclude: [PathKit.Path]
 
-    struct Target {
-        let name: String
-        let module: String
+    public struct Target {
+        public let name: String
+        public let module: String
 
         init(dict: [String: String]) throws {
             guard let name = dict["name"] else {
@@ -51,12 +51,12 @@ struct Project {
 
 }
 
-struct Paths {
-    let include: [Path]
-    let exclude: [Path]
-    let allPaths: [Path]
+public struct Paths {
+    public let include: [PathKit.Path]
+    public let exclude: [PathKit.Path]
+    public let allPaths: [PathKit.Path]
 
-    var isEmpty: Bool {
+    public var isEmpty: Bool {
         return allPaths.isEmpty
     }
 
@@ -78,7 +78,7 @@ struct Paths {
         }
     }
 
-    init(include: [Path], exclude: [Path] = []) {
+    public init(include: [PathKit.Path], exclude: [PathKit.Path] = []) {
         self.include = include
         self.exclude = exclude
 
@@ -90,7 +90,7 @@ struct Paths {
 
 }
 
-enum Source {
+public enum Source {
     case projects([Project])
     case sources(Paths)
 
@@ -109,7 +109,7 @@ enum Source {
         }
     }
 
-    var isEmpty: Bool {
+    public var isEmpty: Bool {
         switch self {
         case let .sources(paths):
             return paths.allPaths.isEmpty
@@ -119,12 +119,12 @@ enum Source {
     }
 }
 
-struct Output {
-    struct LinkTo {
-        let project: XcodeProj
-        let projectPath: Path
-        let target: String
-        let group: String?
+public struct Output {
+    public struct LinkTo {
+        public let project: XcodeProj
+        public let projectPath: PathKit.Path
+        public let target: String
+        public let group: String?
 
         init(dict: [String: Any], relativePath: Path) throws {
             guard let project = dict["project"] as? String else {
@@ -141,10 +141,10 @@ struct Output {
         }
     }
 
-    let path: Path
-    let linkTo: LinkTo?
+    public let path: PathKit.Path
+    public let linkTo: LinkTo?
 
-    var isDirectory: Bool {
+    public var isDirectory: Bool {
         guard path.exists else {
             return path.lastComponentWithoutExtension == path.lastComponent || path.string.hasSuffix("/")
         }
@@ -165,14 +165,14 @@ struct Output {
         }
     }
 
-    init(_ path: Path, linkTo: LinkTo? = nil) {
+    public init(_ path: PathKit.Path, linkTo: LinkTo? = nil) {
         self.path = path
         self.linkTo = linkTo
     }
 
 }
 
-struct Configuration {
+public struct Configuration {
 
     enum Error: Swift.Error, CustomStringConvertible {
         case invalidFormat(message: String)
@@ -200,12 +200,12 @@ struct Configuration {
         }
     }
 
-    let source: Source
-    let templates: Paths
-    let output: Output
-    let cacheBasePath: Path
-    let forceParse: [String]
-    let args: [String: NSObject]
+    public let source: Source
+    public let templates: Paths
+    public let output: Output
+    public let cacheBasePath: Path
+    public let forceParse: [String]
+    public let args: [String: NSObject]
 
     init(
         path: Path,
@@ -261,7 +261,7 @@ struct Configuration {
         self.args = dict["args"] as? [String: NSObject] ?? [:]
     }
 
-    init(sources: Paths, templates: Paths, output: Path, cacheBasePath: Path, forceParse: [String], args: [String: NSObject]) {
+    public init(sources: Paths, templates: Paths, output: Path, cacheBasePath: Path, forceParse: [String], args: [String: NSObject]) {
         self.source = .sources(sources)
         self.templates = templates
         self.output = Output(output, linkTo: nil)

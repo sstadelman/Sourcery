@@ -8,6 +8,7 @@ import PathKit
 import Quick
 
 @testable import Sourcery
+@testable import SourceryFramework
 
 private class Reference {}
 

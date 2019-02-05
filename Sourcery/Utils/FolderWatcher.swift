@@ -8,23 +8,23 @@
 
 import Foundation
 
-enum FolderWatcher {
+public enum FolderWatcher {
 
-    struct Event {
-        let path: String
-        let flags: Flag
+    public struct Event {
+        public let path: String
+        public let flags: Flag
 
-        struct Flag: OptionSet {
-            let rawValue: FSEventStreamEventFlags
-            init(rawValue: FSEventStreamEventFlags) {
+        public struct Flag: OptionSet {
+            public let rawValue: FSEventStreamEventFlags
+            public init(rawValue: FSEventStreamEventFlags) {
                 self.rawValue = rawValue
             }
-            init(_ value: Int) {
+            public init(_ value: Int) {
                 self.rawValue = FSEventStreamEventFlags(value)
             }
 
             static let isDirectory = Flag(kFSEventStreamEventFlagItemIsDir)
-            static let isFile = Flag(kFSEventStreamEventFlagItemIsFile)
+            static public let isFile = Flag(kFSEventStreamEventFlagItemIsFile)
 
             static let created = Flag(kFSEventStreamEventFlagItemCreated)
             static let modified = Flag(kFSEventStreamEventFlagItemModified)
@@ -63,7 +63,7 @@ enum FolderWatcher {
         }
     }
 
-    class Local {
+    public class Local {
         private let path: String
         private var stream: FSEventStreamRef!
         private let closure: (_ events: [Event]) -> Void
@@ -74,7 +74,7 @@ enum FolderWatcher {
         ///   - path: Path to observe
         ///   - latency: Latency to use
         ///   - closure: Callback closure
-        init(path: String, latency: TimeInterval = 1/60, closure: @escaping (_ events: [Event]) -> Void) {
+        public init(path: String, latency: TimeInterval = 1/60, closure: @escaping (_ events: [Event]) -> Void) {
             self.path = path
             self.closure = closure
 

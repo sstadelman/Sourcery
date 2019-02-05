@@ -5,6 +5,7 @@ import PathKit
 @testable import SourceryJS
 @testable import Sourcery
 @testable import SourceryRuntime
+@testable import SourceryFramework
 
 class JavaScriptTemplateTests: QuickSpec {
     override func spec() {

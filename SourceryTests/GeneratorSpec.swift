@@ -3,6 +3,7 @@ import Nimble
 import Stencil
 @testable import Sourcery
 @testable import SourceryRuntime
+@testable import SourceryFramework
 
 class GeneratorSpec: QuickSpec {
     // swiftlint:disable function_body_length

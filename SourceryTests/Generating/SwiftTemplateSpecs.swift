@@ -13,6 +13,7 @@ import PathKit
 @testable import Sourcery
 @testable import SourceryRuntime
 @testable import SourcerySwift
+@testable import SourceryFramework
 
 class SwiftTemplateTests: QuickSpec {
     override func spec() {

@@ -11,7 +11,7 @@ extension Array {
     }
 
     /// We have to roll our own solution because concurrentPerform will use slowPath if no NSApplication is available
-    func parallelMap<T>(_ transform: (Element) throws -> T, progress: ((Int) -> Void)? = nil) throws -> [T] {
+    public func parallelMap<T>(_ transform: (Element) throws -> T, progress: ((Int) -> Void)? = nil) throws -> [T] {
         let count = self.count
         let maxConcurrentJobs = ProcessInfo.processInfo.activeProcessorCount
 
