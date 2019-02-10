@@ -157,18 +157,6 @@
 		};
 /* End PBXContainerItemProxy section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		1BF7F37C2206B38300E16103 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 1;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
 		0906124C1E2BC43500BA0937 /* FileParser + MethodsSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "FileParser + MethodsSpec.swift"; sourceTree = "<group>"; };
 		0911DAF31E2141B7001FF3EB /* TypeNameSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TypeNameSpec.swift; sourceTree = "<group>"; };
@@ -223,6 +211,7 @@
 		1B5A88EC22041BC6008E033D /* PathKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PathKit.framework; path = Build/Products/Debug/PathKit/PathKit.framework; sourceTree = "<group>"; };
 		1B5A88F122041C87008E033D /* SwiftTryCatch.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftTryCatch.framework; path = Build/Products/Debug/SwiftTryCatch/SwiftTryCatch.framework; sourceTree = "<group>"; };
 		1B5A88F322041C98008E033D /* xcproj.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = xcproj.framework; path = Build/Products/Debug/xcproj/xcproj.framework; sourceTree = "<group>"; };
+		1BCC3959220FEFA600C241CA /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		1BF7F37E2206B38300E16103 /* SourcerParsing */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SourcerParsing; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BF7F3802206B38300E16103 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		1BF7F3902206B80B00E16103 /* Stencil.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Stencil.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -499,6 +488,14 @@
 			path = SourceryFramework;
 			sourceTree = "<group>";
 		};
+		1BCC3958220FEFA600C241CA /* test */ = {
+			isa = PBXGroup;
+			children = (
+				1BCC3959220FEFA600C241CA /* main.swift */,
+			);
+			path = test;
+			sourceTree = "<group>";
+		};
 		1BF7F37F2206B38300E16103 /* SourcerParsing */ = {
 			isa = PBXGroup;
 			children = (
@@ -580,6 +577,7 @@
 				635AB26B201F2E5300342C13 /* SourcerySwift */,
 				1B5A88DB22041A70008E033D /* SourceryFramework */,
 				1BF7F37F2206B38300E16103 /* SourcerParsing */,
+				1BCC3958220FEFA600C241CA /* test */,
 				CD754C8C1D853F000082B512 /* Products */,
 				003958827841F12BBF99EB67 /* Frameworks */,
 				0D2647542B719EF133C15D87 /* Pods */,
@@ -848,7 +846,6 @@
 			buildPhases = (
 				1BF7F37A2206B38300E16103 /* Sources */,
 				1BF7F37B2206B38300E16103 /* Frameworks */,
-				1BF7F37C2206B38300E16103 /* CopyFiles */,
 			);
 			buildRules = (
 			);
