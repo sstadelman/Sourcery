@@ -1,0 +1,7 @@
+<%_
+import Foo
+let deck: DealtDeck = DealtDeck()
+let variableArrayValue = types.structs.flatMap({ $0.variables })
+-%>
+<%= deck.value %>
+<%= variableArrayValue.foo() %>

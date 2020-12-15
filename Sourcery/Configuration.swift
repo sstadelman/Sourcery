@@ -3,6 +3,7 @@ import xcproj
 import PathKit
 import Yams
 import SourceryRuntime
+import SourceryUtils
 
 struct Project {
     let file: XcodeProj
@@ -178,6 +179,7 @@ struct Configuration {
         case invalidFormat(message: String)
         case invalidSources(message: String)
         case invalidTemplates(message: String)
+        case invalidTemplateDependencies(message: String)
         case invalidOutput(message: String)
         case invalidCacheBasePath(message: String)
         case invalidPaths(message: String)
@@ -190,6 +192,8 @@ struct Configuration {
                 return "Invalid sources. \(message)"
             case .invalidTemplates(let message):
                 return "Invalid templates. \(message)"
+            case .invalidTemplateDependencies(let message):
+                return "Invalid template dependencies. \(message)"
             case .invalidOutput(let message):
                 return "Invalid output. \(message)"
             case .invalidCacheBasePath(let message):
@@ -206,6 +210,7 @@ struct Configuration {
     let cacheBasePath: Path
     let forceParse: [String]
     let args: [String: NSObject]
+    let templateDependencies: [SwiftPackageDecl]
 
     init(
         path: Path,
@@ -240,6 +245,12 @@ struct Configuration {
         }
         self.templates = templates
 
+        if let packages = dict["packages"] as? [String: [String: String]] {
+            self.templateDependencies = try packages.map({ try SwiftPackageDecl(name: $0.key, dict: $0.value) })
+        } else {
+            self.templateDependencies = []
+        }
+
         self.forceParse = dict["force-parse"] as? [String] ?? []
 
         if let output = dict["output"] as? String {
@@ -261,9 +272,10 @@ struct Configuration {
         self.args = dict["args"] as? [String: NSObject] ?? [:]
     }
 
-    init(sources: Paths, templates: Paths, output: Path, cacheBasePath: Path, forceParse: [String], args: [String: NSObject]) {
+    init(sources: Paths, templates: Paths, templateDependencies: [SwiftPackageDecl] = [], output: Path, cacheBasePath: Path, forceParse: [String], args: [String: NSObject]) {
         self.source = .sources(sources)
         self.templates = templates
+        self.templateDependencies = templateDependencies
         self.output = Output(output, linkTo: nil)
         self.cacheBasePath = cacheBasePath
         self.forceParse = forceParse

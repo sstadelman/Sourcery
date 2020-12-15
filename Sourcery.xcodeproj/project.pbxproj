@@ -49,6 +49,7 @@
 		09B1DD3F1E21ADD8009228EE /* GeneratorSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = E291DF28602426F7A4C8D737 /* GeneratorSpec.swift */; };
 		09C6B0D41E11C1C500246CDF /* ClassSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09C6B0D31E11C1C500246CDF /* ClassSpec.swift */; };
 		185DAA6CDB46FC4502766F3A /* Pods_SourceryTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A1278DE322EEEC30934B058 /* Pods_SourceryTests.framework */; };
+		1BAF727725AE2FEF00205D48 /* SwiftPackageDecl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BAF727625AE2FEF00205D48 /* SwiftPackageDecl.swift */; };
 		369A5F6281FBAB7834582E3F /* Pods_SourcerySwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F81A4FAFF66C386F53742B5F /* Pods_SourcerySwift.framework */; };
 		47379D2B215962BF002C1DAA /* SourceryRuntime.content.generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4710194E2150509C00F50715 /* SourceryRuntime.content.generated.swift */; };
 		47635C9C21DA32E900B2D5A1 /* SourceryUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 47635C9A21DA32E800B2D5A1 /* SourceryUtils.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -269,6 +270,7 @@
 		09C61FA51E76109E005EA58A /* Xcode+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Xcode+Extensions.swift"; sourceTree = "<group>"; };
 		09C6B0D31E11C1C500246CDF /* ClassSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClassSpec.swift; sourceTree = "<group>"; };
 		1212A564CA8698529C0ACC6B /* Pods-SourceryUtils.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SourceryUtils.release.xcconfig"; path = "Target Support Files/Pods-SourceryUtils/Pods-SourceryUtils.release.xcconfig"; sourceTree = "<group>"; };
+		1BAF727625AE2FEF00205D48 /* SwiftPackageDecl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftPackageDecl.swift; sourceTree = "<group>"; };
 		39E4BBC6C7A5FE28E65D2364 /* Pods_Sourcery.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Sourcery.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4710194E2150509C00F50715 /* SourceryRuntime.content.generated.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SourceryRuntime.content.generated.swift; sourceTree = "<group>"; };
 		47635C9821DA32E800B2D5A1 /* SourceryUtils.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SourceryUtils.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -562,6 +564,7 @@
 		47635CA521DA338200B2D5A1 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				1BAF727625AE2FEF00205D48 /* SwiftPackageDecl.swift */,
 				E291D6548CB0B086F0574D1B /* Array+Parallel.swift */,
 				47635CA621DA338200B2D5A1 /* Path+Extensions.swift */,
 				47635CA721DA338200B2D5A1 /* Version.swift */,
@@ -1528,6 +1531,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				47635CAA21DA338200B2D5A1 /* Version.swift in Sources */,
+				1BAF727725AE2FEF00205D48 /* SwiftPackageDecl.swift in Sources */,
 				47635CA921DA338200B2D5A1 /* Path+Extensions.swift in Sources */,
 				CDDF5BF82572697200F494EA /* Array+Parallel.swift in Sources */,
 				47635CAB21DA338200B2D5A1 /* Sha.swift in Sources */,

@@ -29,6 +29,7 @@ open class SwiftTemplate {
     let code: String
     let version: String?
     let includedFiles: [Path]
+    let dependencies: [SwiftPackageDecl]
 
     private lazy var buildDir: Path = {
         let pathComponent = "SwiftTemplate" + (version.map { "/\($0)" } ?? "")
@@ -36,11 +37,12 @@ open class SwiftTemplate {
         return Path(tempDirURL.path)
     }()
 
-    public init(path: Path, cachePath: Path? = nil, version: String? = nil) throws {
+    public init(path: Path, cachePath: Path? = nil, version: String? = nil, dependencies: [SwiftPackageDecl] = []) throws {
         self.sourcePath = path
         self.cachePath = cachePath
         self.version = version
-        (self.code, self.includedFiles) = try SwiftTemplate.parse(sourcePath: path)
+        self.dependencies = dependencies
+        (self.code, self.includedFiles) = try SwiftTemplate.parse(sourcePath: path, importRuntime: !dependencies.includesSourceryRuntime)
     }
 
     private enum Command {
@@ -50,7 +52,7 @@ open class SwiftTemplate {
         case outputEncoded(String)
     }
 
-    static func parse(sourcePath: Path) throws -> (String, [Path]) {
+    static func parse(sourcePath: Path, importRuntime: Bool = true) throws -> (String, [Path]) {
 
         let commands = try SwiftTemplate.parseCommands(in: sourcePath)
 
@@ -74,7 +76,7 @@ open class SwiftTemplate {
         let contents = outputFile.joined(separator: "\n")
         let code = """
         import Foundation
-        import SourceryRuntime
+        \(importRuntime ? "import SourceryRuntime" : "")
 
         let context = ProcessInfo().context!
         let types = context.types
@@ -178,12 +180,13 @@ open class SwiftTemplate {
     public func render(_ context: Any) throws -> String {
         let binaryPath: Path
 
+        // Builds what is necessary, reads from cache if not invalidated
         if let cachePath = cachePath,
             let hash = code.sha256(),
             let hashPath = hash.addingPercentEncoding(withAllowedCharacters: CharacterSet.alphanumerics) {
 
             binaryPath = cachePath + hashPath
-            if !binaryPath.exists {
+            if true /*!binaryPath.exists */  {
                 try? cachePath.delete() // clear old cache
                 try cachePath.mkdir()
                 try build().move(binaryPath)
@@ -199,6 +202,7 @@ open class SwiftTemplate {
         }
         try serializedContextPath.write(data)
 
+        // Execute
         let result = try Process.runCommand(path: binaryPath.description,
                                             arguments: [serializedContextPath.description])
         if !result.error.isEmpty {
@@ -212,13 +216,18 @@ open class SwiftTemplate {
         let templateFilesDir = sourcesDir + Path("SwiftTemplate")
         let mainFile = templateFilesDir + Path("main.swift")
         let manifestFile = buildDir + Path("Package.swift")
+        let rpathDir = buildDir + Path(".build/debug")
 
         try sourcesDir.mkpath()
         try? templateFilesDir.delete()
         try templateFilesDir.mkpath()
 
-        try copyRuntimePackage(to: sourcesDir)
-        try manifestFile.write(manifestCode)
+        print("BUILDDIR: \(buildDir)")
+        print("SOURCESDIR: \(sourcesDir)")
+        if shouldLinkLocalRuntimeCopy {
+            try copyRuntimePackage(to: sourcesDir)
+        }
+        try manifestFile.write(manifestCode(rpath: rpathDir))
         try mainFile.write(code)
 
         let binaryFile = buildDir + Path(".build/debug/SwiftTemplate")
@@ -236,6 +245,9 @@ open class SwiftTemplate {
             "-Xswiftc", "-suppress-warnings",
             "--disable-sandbox"
         ]
+        
+        print(arguments.joined(separator: " "))
+        
         let compilationResult = try Process.runCommand(path: "/usr/bin/env",
                                                        arguments: arguments,
                                                        currentDirectoryPath: buildDir)
@@ -249,23 +261,31 @@ open class SwiftTemplate {
         return binaryFile
     }
 
-    private var manifestCode: String {
+    private func manifestCode(rpath: Path) -> String {
         return """
-        // swift-tools-version:4.0
+        // swift-tools-version:5.3
         // The swift-tools-version declares the minimum version of Swift required to build this package.
 
         import PackageDescription
 
         let package = Package(
             name: "SwiftTemplate",
+            platforms: [.macOS(.v10_15)],
             products: [
                 .executable(name: "SwiftTemplate", targets: ["SwiftTemplate"])
+            ],
+            dependencies: [
+                \(dependencyDecls())
             ],
             targets: [
                 .target(name: "SourceryRuntime"),
                 .target(
                     name: "SwiftTemplate",
-                    dependencies: ["SourceryRuntime"]),
+                    dependencies: [
+                        \(dependencyProductDecls())
+                    ]
+                    \(swiftTemplateLinkerSettings(rpath: rpath))
+                ),
             ]
         )
         """
@@ -274,7 +294,10 @@ open class SwiftTemplate {
     private func copyRuntimePackage(to path: Path) throws {
         try FolderSynchronizer().sync(files: sourceryRuntimeFiles, to: path + Path("SourceryRuntime"))
     }
-
+    
+    private lazy var shouldLinkLocalRuntimeCopy: Bool = {
+        !dependencies.includesSourceryRuntime
+    }()
 }
 
 fileprivate extension SwiftTemplate {
@@ -283,6 +306,46 @@ fileprivate extension SwiftTemplate {
         return Path(Bundle(for: SwiftTemplate.self).bundlePath +  "/Versions/Current/Frameworks")
     }
 
+}
+
+fileprivate extension SwiftTemplate {
+    
+    func targets(rpath: Path) -> String {
+        [localRuntimeTarget(), swiftTemplateTarget(rpath: rpath)].compactMap({ $0 }).joined(separator: ",\n")
+    }
+    
+    private func localRuntimeTarget() -> String? {
+        shouldLinkLocalRuntimeCopy ? ".target(name: \"SourceryRuntime\")" : nil
+    }
+    
+    private func swiftTemplateTarget(rpath: Path) -> String {
+        """
+        .target(
+            name: "SwiftTemplate",
+            dependencies: [
+                \(dependencyProductDecls())
+            ]
+            \(swiftTemplateLinkerSettings(rpath: rpath))
+        ),
+        """
+    }
+    
+    private func dependencyDecls() -> String {
+        """
+        \(dependencies.map({ $0.dependencyDescription }).joined(separator: ",\n"))
+        """
+    }
+    
+    private func dependencyProductDecls() -> String {
+        shouldLinkLocalRuntimeCopy ? ".target(name: \"SourceryRuntime\")" :
+        dependencies.flatMap({ $0.productsDescriptions }).joined(separator: ",\n")
+    }
+    
+    private func swiftTemplateLinkerSettings(rpath: Path) -> String {
+        guard !dependencies.isEmpty else { return "" }
+        let flags = ["-Xlinker", "-rpath", "-Xlinker", "\(rpath.string)"].map({ "\"\($0)\"" }).joined(separator: ", ")
+        return ", linkerSettings: [.unsafeFlags([\(flags)])]"
+    }
 }
 
 // swiftlint:disable:next force_try

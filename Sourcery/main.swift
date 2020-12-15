@@ -119,7 +119,7 @@ func runCLI() {
                 let args = args.joined(separator: ",")
                 let arguments = AnnotationsParser.parse(line: args)
                 configuration = Configuration(sources: Paths(include: sources, exclude: excludeSources) ,
-                                              templates: Paths(include: templates, exclude: excludeTemplates),
+                                              templates: Paths(include: templates, exclude: excludeTemplates), templateDependencies: [],
                                               output: output.string.isEmpty ? "." : output,
                                               cacheBasePath: Path.defaultBaseCachePath,
                                               forceParse: forceParse,
@@ -172,6 +172,7 @@ func runCLI() {
             if let keepAlive = try sourcery.processFiles(
                 configuration.source,
                 usingTemplates: configuration.templates,
+                templateDependencies: configuration.templateDependencies,
                 output: configuration.output,
                 forceParse: configuration.forceParse) {
                 RunLoop.current.run()

@@ -1,0 +1,13 @@
+sources:
+  - TestSource.swift
+templates:
+  - Template.swifttemplate
+output:
+  .gen/
+args:
+  prune: true
+packages:
+  foo:
+    path: TestPackage
+    product: Foo
+  

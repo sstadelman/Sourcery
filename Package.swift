@@ -1,11 +1,11 @@
-// swift-tools-version:5.0
+// swift-tools-version:5.3
 
 import PackageDescription
 
 let package = Package(
     name: "Sourcery",
     platforms: [
-       .macOS(.v10_11),
+       .macOS(.v10_15),
     ],
     products: [
         .executable(name: "sourcery", targets: ["Sourcery"]),
@@ -13,6 +13,7 @@ let package = Package(
         .library(name: "SourceryJS", targets: ["SourceryJS"]),
         .library(name: "SourcerySwift", targets: ["SourcerySwift"]),
         .library(name: "SourceryFramework", targets: ["SourceryFramework"]),
+        .library(name: "SourceryTestSupport", targets: ["SourceryTestSupport"]),
     ],
     dependencies: [
         .package(url: "https://github.com/kylef/Commander.git", .exact("0.9.1")),
@@ -20,7 +21,8 @@ let package = Package(
         .package(url: "https://github.com/kylef/PathKit.git", .exact("0.9.2")),
         .package(url: "https://github.com/jpsim/SourceKitten.git", .exact("0.30.1")),
         .package(url: "https://github.com/SwiftGen/StencilSwiftKit.git", .exact("2.7.0")),
-        .package(url: "https://github.com/tuist/xcodeproj", .exact("4.3.1")),
+        .package(name: "xcproj", url: "https://github.com/tuist/xcodeproj", .exact("4.3.1")),
+        .package(url: "https://github.com/apple/swift-tools-support-core.git", .revision("a2d779aed8fff8afd4153a13c4a4ef530edea1a7"))
     ],
     targets: [
         .target(name: "Sourcery", dependencies: [
@@ -30,7 +32,7 @@ let package = Package(
             "SourcerySwift",
             "Commander",
             "PathKit",
-            "SourceKittenFramework",
+            .product(name: "SourceKittenFramework", package: "SourceKitten"),
             "StencilSwiftKit",
             "xcproj",
             "TryCatch",
@@ -40,10 +42,10 @@ let package = Package(
           "PathKit"
         ]),
         .target(name: "SourceryFramework", dependencies: [
-          "PathKit",
-          "SourceKittenFramework",
-          "SourceryUtils",
-          "SourceryRuntime"
+            "PathKit",
+            .product(name: "SourceKittenFramework", package: "SourceKitten"),
+            "SourceryUtils",
+            "SourceryRuntime"
         ]),
         .target(name: "SourceryJS", dependencies: [
           "PathKit"
@@ -54,5 +56,17 @@ let package = Package(
           "SourceryUtils"
         ]),
         .target(name: "TryCatch", path: "TryCatch"),
+        .target(name: "SourceryTestSupport", dependencies: [
+            "Sourcery"
+        ]),
+        .testTarget(name: "SourceryUtilsTests",
+                    dependencies: [
+                        .target(name: "SourceryTestSupport"),
+                        "SourceryUtils",
+                        .product(name: "TSCTestSupport", package: "swift-tools-support-core")
+                    ],
+                    resources: [
+                        .copy("TestCase.zip")
+                    ])
     ]
 )

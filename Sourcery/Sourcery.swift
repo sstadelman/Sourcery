@@ -37,6 +37,8 @@ class Sourcery {
     // content annotated with file annotations per file path to write it to
     fileprivate var fileAnnotatedContent: [Path: [String]] = [:]
 
+    fileprivate var templateDependencies: [SwiftPackageDecl] = []
+
     /// Creates Sourcery processor
     init(verbose: Bool = false, watcherEnabled: Bool = false, cacheDisabled: Bool = false, cacheBasePath: Path? = nil, prune: Bool = false, arguments: [String: NSObject] = [:]) {
         self.verbose = verbose
@@ -56,8 +58,9 @@ class Sourcery {
     ///   - forceParse: extensions of generated sourcery file that can be parsed
     ///   - watcherEnabled: Whether daemon watcher should be enabled.
     /// - Throws: Potential errors.
-    func processFiles(_ source: Source, usingTemplates templatesPaths: Paths, output: Output, forceParse: [String] = []) throws -> [FolderWatcher.Local]? {
+    func processFiles(_ source: Source, usingTemplates templatesPaths: Paths, templateDependencies: [SwiftPackageDecl] = [], output: Output, forceParse: [String] = []) throws -> [FolderWatcher.Local]? {
         self.templatesPaths = templatesPaths
+        self.templateDependencies = templateDependencies
         self.outputPath = output
 
         let watchPaths: Paths
@@ -208,7 +211,7 @@ class Sourcery {
         return try templatePaths(from: from).compactMap {
             if $0.extension == "swifttemplate" {
                 let cachePath = cachesDir(sourcePath: $0)
-                return try SwiftTemplate(path: $0, cachePath: cachePath, version: type(of: self).version)
+                return try SwiftTemplate(path: $0, cachePath: cachePath, version: type(of: self).version, dependencies: templateDependencies)
             } else if $0.extension == "ejs" {
                 guard EJSTemplate.ejsPath != nil else {
                     Log.warning("Skipping template \($0). JavaScript templates require EJS path to be set manually when using Sourcery built with Swift Package Manager. Use `--ejsPath` command line argument to set it.")
