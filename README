@@ -1,0 +1,5 @@
+Steps on how to use codesign.py script
+1. Copy the exported script codesign.py to the ./scripts directory under the Xcode project.
+2. Open the project in Xcode and add "New Run Script Phase" under "Build Phases" section.
+3. Add "python ./scripts/codesign.py" in the script text area.
+4. Move this build phase above other phases so that it execute first and then build the project.

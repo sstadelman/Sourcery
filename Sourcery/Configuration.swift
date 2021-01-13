@@ -245,7 +245,7 @@ struct Configuration {
         }
         self.templates = templates
 
-        if let packages = dict["packages"] as? [String: [String: String]] {
+        if let packages = dict["packages"] as? [String: [String: Any]] {
             self.templateDependencies = try packages.map({ try SwiftPackageDecl(name: $0.key, dict: $0.value) })
         } else {
             self.templateDependencies = []

@@ -2,9 +2,11 @@ import Quick
 import Nimble
 import PathKit
 @testable import Sourcery
+import SourceryUtils
+import Yams
 
 class ConfigurationSpec: QuickSpec {
-
+    // swiftlint:disable function_body_length
     override func spec() {
         let relativePath = Path("/some/path")
 
@@ -51,6 +53,181 @@ class ConfigurationSpec: QuickSpec {
                     } catch {
                         expect("\(error)").to(equal("Invalid config file format. Expected dictionary."))
                     }
+                }
+            }
+//            cloud_sdk_ios_sourcery_utils:
+//            url: https://github.com/sstadelman/cloud-sdk-ios-sourcery-utils.git
+//            branch: main
+//            exactVersion: xxxx
+//            version: "0.0.1"
+//            revision: xxxx
+//            from: xxxx
+//            majorVersion: xxxx
+//            minorVersion: xxx
+//            minVersion: xxxx
+//            maxVersion: xxxx
+
+            context("given valid config file with swift package dependencies") {
+                let ymlPrefix = """
+                sources:
+                  - ./foo/Sources/Files
+                templates:
+                  - ./foo/Templates
+                output:
+                  gen
+                """
+
+                func dependenciesForConfig(with packageDecls: String) -> [SwiftPackageDecl] {
+                    let yml = ymlPrefix + "\n" + packageDecls
+                    do {
+                        guard let dict = try Yams.load(yaml: yml) as? [String: Any] else {
+                            throw Configuration.Error.invalidFormat(message: "Expected dictionary.")
+                        }
+                        let config = try Configuration(dict: dict, relativePath: Path("foo"))
+                        return config.templateDependencies
+                    } catch {
+                        return []
+                    }
+                }
+
+                it("creates swift package dependency with path location") {
+                    let barDependency = """
+                    packages:
+                      bar:
+                        path: ./../bar/
+                    """
+                    let dependencies = dependenciesForConfig(with: barDependency)
+                    expect(dependencies.count).to(equal(1))
+                    expect(dependencies.first?.products.count).to(equal(1))
+                    guard let dependency = dependencies.first else { return fail("should find dependency") }
+                    expect(dependency.dependencyDescription).to(equal(".package(name: \"bar\", path: \"../bar\")"))
+                }
+
+                it("creates swift package dependency with exact version requirement") {
+                    let barDependency = """
+                    packages:
+                      bar:
+                        url: https://www.example.com/bar.git
+                        exactVersion: "0.0.1"
+                    """
+                    guard let dependency = dependenciesForConfig(with: barDependency).first else { return fail("should find dependency") }
+                    expect(dependency.dependencyDescription).to(equal(".package(name: \"bar\", url: \"https://www.example.com/bar.git\", .exact(\"0.0.1\"))"))
+                }
+
+                it("creates swift package dependency with version requirement") {
+                    let barDependency = """
+                    packages:
+                      bar:
+                        url: https://www.example.com/bar.git
+                        version: "0.0.1"
+                    """
+                    guard let dependency = dependenciesForConfig(with: barDependency).first else { return fail("should find dependency") }
+                    expect(dependency.dependencyDescription).to(equal(".package(name: \"bar\", url: \"https://www.example.com/bar.git\", .exact(\"0.0.1\"))"))
+                }
+
+                it("creates swift package dependency with revision requirement") {
+                    let barDependency = """
+                    packages:
+                      bar:
+                        url: https://www.example.com/bar.git
+                        revision: "97a4ea52451763d6fc8c595c1eebb5609f0a394b"
+                    """
+                    guard let dependency = dependenciesForConfig(with: barDependency).first else { return fail("should find dependency") }
+                    expect(dependency.dependencyDescription).to(equal(".package(name: \"bar\", url: \"https://www.example.com/bar.git\", .revision(\"97a4ea52451763d6fc8c595c1eebb5609f0a394b\"))"))
+                }
+
+                it("creates swift package dependency with from requirement") {
+                    let barDependency = """
+                    packages:
+                      bar:
+                        url: https://www.example.com/bar.git
+                        from: "1.1.2"
+                    """
+                    guard let dependency = dependenciesForConfig(with: barDependency).first else { return fail("should find dependency") }
+                    expect(dependency.dependencyDescription).to(equal(".package(name: \"bar\", url: \"https://www.example.com/bar.git\", from: \"1.1.2\")"))
+                }
+
+                it("creates swift package dependency with majorVersion requirement") {
+                    let barDependency = """
+                    packages:
+                      bar:
+                        url: https://www.example.com/bar.git
+                        majorVersion: "1.1.2"
+                    """
+                    guard let dependency = dependenciesForConfig(with: barDependency).first else { return fail("should find dependency") }
+                    expect(dependency.dependencyDescription).to(equal(".package(name: \"bar\", url: \"https://www.example.com/bar.git\", .upToNextMajor(from: \"1.1.2\"))"))
+                }
+
+                it("creates swift package dependency with minorVersion requirement") {
+                    let barDependency = """
+                    packages:
+                      bar:
+                        url: https://www.example.com/bar.git
+                        minorVersion: "1.1.2"
+                    """
+                    guard let dependency = dependenciesForConfig(with: barDependency).first else { return fail("should find dependency") }
+                    expect(dependency.dependencyDescription).to(equal(".package(name: \"bar\", url: \"https://www.example.com/bar.git\", .upToNextMinor(from: \"1.1.2\"))"))
+                }
+
+                it("creates swift package dependency with minVersion requirement") {
+                    let barDependency = """
+                    packages:
+                      bar:
+                        url: https://www.example.com/bar.git
+                        minVersion: "1.1.2"
+                    """
+                    guard let dependency = dependenciesForConfig(with: barDependency).first else { return fail("should find dependency") }
+                    expect(dependency.dependencyDescription).to(equal(".package(name: \"bar\", url: \"https://www.example.com/bar.git\", from: \"1.1.2\")"))
+                }
+
+                it("creates swift package dependency with range requirement") {
+                    let barDependency = """
+                    packages:
+                      bar:
+                        url: https://www.example.com/bar.git
+                        minVersion: "1.1.2"
+                        maxVersion: "2.1.0"
+                    """
+                    guard let dependency = dependenciesForConfig(with: barDependency).first else { return fail("should find dependency") }
+                    expect(dependency.dependencyDescription).to(equal(".package(name: \"bar\", url: \"https://www.example.com/bar.git\", \"1.1.2\"...\"2.1.0\")"))
+                }
+
+                it("creates swift package dependency with implicit product") {
+                    let barDependency = """
+                    packages:
+                      bar:
+                        url: https://www.example.com/bar.git
+                        from: "1.1.2"
+                    """
+                    guard let dependency = dependenciesForConfig(with: barDependency).first else { return fail("should find dependency") }
+                    expect(dependency.products.count).to(equal(1))
+                    expect(dependency.productsDescriptions.joined()).to(equal(".product(name: \"bar\", package: \"bar\")"))
+                }
+
+                it("creates swift package dependency with specified product") {
+                    let barDependency = """
+                    packages:
+                      bar:
+                        url: https://www.example.com/bar.git
+                        from: "1.1.2"
+                        product: Bar
+                    """
+                    guard let dependency = dependenciesForConfig(with: barDependency).first else { return fail("should find dependency") }
+                    expect(dependency.productsDescriptions.joined()).to(equal(".product(name: \"Bar\", package: \"bar\")"))
+                }
+
+                it("creates swift package dependency with multiple products") {
+                    let barDependency = """
+                    packages:
+                      bar:
+                        url: https://www.example.com/bar.git
+                        from: "1.1.2"
+                        products:
+                          - Bar
+                          - Foo
+                    """
+                    guard let dependency = dependenciesForConfig(with: barDependency).first else { return fail("should find dependency") }
+                    expect(dependency.productsDescriptions).to(equal([".product(name: \"Bar\", package: \"bar\")", ".product(name: \"Foo\", package: \"bar\")"]))
                 }
             }
 

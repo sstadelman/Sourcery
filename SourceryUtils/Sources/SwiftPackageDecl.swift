@@ -57,7 +57,7 @@ fileprivate extension SwiftPackageDecl {
     }
     
     var location: String {
-        return self.state == .local ? repositoryURL.path : repositoryURL.absoluteString
+        return self.state == .local ? repositoryURL.relativePath : repositoryURL.absoluteString
     }
     
     var includesSourceryRuntime: Bool {
@@ -76,6 +76,7 @@ extension SwiftPackageDecl {
         case branch(String)
         case revision(String)
         case exact(String)
+        case from(String)
         case nextMajor(String)
         case nextMinor(String)
         case range(String, String)
@@ -91,14 +92,17 @@ extension SwiftPackageDecl {
             } else if let x = dict["revision"] as? String {
                 self = .revision(x)
             } else if let x = dict["from"] as? String {
-                self = .nextMajor(x)
+                self = .from(x)
             } else if let x = dict["majorVersion"] as? String {
                 self = .nextMajor(x)
             } else if let x = dict["minorVersion"] as? String {
                 self = .nextMinor(x)
-            } else if let x = dict["minVersion"] as? String,
-                      let y = dict["maxVersion"] as? String {
-                self = .range(x, y)
+            } else if let x = dict["minVersion"] as? String {
+                if let y = dict["maxVersion"] as? String {
+                    self = .range(x, y)
+                } else {
+                    self = .from(x)
+                }
             } else if let x = dict["branch"] as? String {
                 throw Error.branchRequirementIsNotSupported(x)
             } else {
@@ -113,7 +117,9 @@ extension SwiftPackageDecl {
                 case .exact(let x):
                     return ".exact(\(x.quoted))"
                 case .revision(let x):
-                    return ".revision(\(x.quoted)"
+                    return ".revision(\(x.quoted))"
+                case .from(let x):
+                    return "from: \(x.quoted)"
                 case .nextMajor(let x):
                     return ".upToNextMajor(from: \(x.quoted))"
                 case .nextMinor(let x):
@@ -164,7 +170,9 @@ extension SwiftPackageDecl.State: Equatable {
                 return true
             case (.branch(let x), .branch(let y)):
                 return x == y
-            case(.revision(let x), .revision(let y)):
+            case (.revision(let x), .revision(let y)):
+                return x == y
+            case (.from(let x), .from(let y)):
                 return x == y
             case (.exact(let x), .exact(let y)):
                 return x == y
